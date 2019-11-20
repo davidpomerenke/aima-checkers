@@ -14,4 +14,4 @@ You win the game if your opponent cannot do any moves and you have more pieces t
 
 ## Graphical implementation
 
-- [aima-checkers-gui](https://github.com/davidpomerenke/aima-checkers-gui)
+- [aima-checkers-gui](https://github.com/davidpomerenke/checkers)
