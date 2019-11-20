@@ -1,0 +1,23 @@
+{
+  "name": "aima-checkers",
+  "version": "0.1.2",
+  "author": "David Pomerenke",
+  "description": "Checkers game for aima.js.",
+  "repository": {
+    "url": "https://github.com/davidpomerenke/aima-checkers"
+  },
+  "license": "ISC",
+  "keywords": [
+    "Checkers",
+    "Draughts",
+    "Game",
+    "Problem-Solving",
+    "Artificial Intelligence"
+  ],
+  "dependencies": {
+    "aima": "^0.2.5"
+  },
+  "scripts": {
+    "test": "node --experimental-modules test.mjs"
+  }
+}
