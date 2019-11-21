@@ -126,9 +126,13 @@ export const board = state =>
   [0, 1, 2, 3, 4, 5, 6, 7].map(y =>
     [0, 1, 2, 3, 4, 5, 6, 7].map(x =>
       state.p.some(pos => eq(pos, [y, x]))
-        ? 'x'
+        ? state.p.find(pos => eq(pos, [y, x]))[2]
+          ? 'X'
+          : 'x'
         : state.q.some(pos => eq(pos, [y, x]))
-          ? 'o'
+          ? state.q.find(pos => eq(pos, [y, x]))[2]
+            ? 'O'
+            : 'o'
           : ' '
     )
   )
