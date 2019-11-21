@@ -120,6 +120,8 @@ export const dist = ([y1, x1], [y2, x2]) => Math.abs(y2 - y1) + Math.abs(x2 - x1
 
 export const intermediate = ([y1, x1], [y2, x2]) => [(y1 + y2) / 2, (x1 + x2) / 2]
 
+export const boardString = state => state.map(row => row.join('')).reverse().join('\n')
+
 export const board = state =>
   [0, 1, 2, 3, 4, 5, 6, 7].map(y =>
     [0, 1, 2, 3, 4, 5, 6, 7].map(x =>
@@ -127,6 +129,6 @@ export const board = state =>
         ? 'x'
         : state.q.some(pos => eq(pos, [y, x]))
           ? 'o'
-          : ' '
+          : '  '
     )
   )
