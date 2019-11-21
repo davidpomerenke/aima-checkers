@@ -129,6 +129,6 @@ export const board = state =>
         ? 'x'
         : state.q.some(pos => eq(pos, [y, x]))
           ? 'o'
-          : '  '
+          : ' '
     )
   )

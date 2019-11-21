@@ -18,6 +18,7 @@
     "aima": "^0.2.5"
   },
   "scripts": {
-    "test": "node --experimental-modules test.mjs"
+    "test": "node --experimental-modules test.mjs",
+    "publish": "npm publish && git push && git push --tags"
   }
 }
