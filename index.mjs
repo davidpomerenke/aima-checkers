@@ -35,25 +35,25 @@ export const checkers = new Game({
 })
 
 export const move = (state, startPoint, direction) =>
-  onBoard(endPoint(state, startPoint, direction)) &&
-    !occupied(state, endPoint(state, startPoint, direction))
-    ? [[startPoint, endPointRoyal(state, startPoint, direction)]]
+  onBoard(endPointXY(state, startPoint, direction)) &&
+    !occupied(state, endPointXY(state, startPoint, direction))
+    ? [[startPoint, endPointXYR(state, startPoint, direction)]]
     : []
 
 export const jump = (state, [y, x, royal], direction, prev = []) =>
-  onBoard(endPoint(state, [y, x], direction, 2)) &&
-    !occupied(state, endPoint(state, [y, x], direction, 2)) &&
-    occupiedBy(state, endPoint(state, [y, x], direction), state.opponent)
+  onBoard(endPointXY(state, [y, x], direction, 2)) &&
+    !occupied(state, endPointXY(state, [y, x], direction, 2)) &&
+    occupiedBy(state, endPointXY(state, [y, x], direction), state.opponent)
     ? [
       [
         ...prev,
         [y, x, royal],
-        endPointRoyal(state, [y, x, royal], direction, 2)
+        endPointXYR(state, [y, x, royal], direction, 2)
       ],
       ...directions(crowned(state, [y, x, royal], direction, 2))
         .flatMap(direction2 => jump(
           prev.length === 1 ? state : recursiveResult(state, prev),
-          endPointRoyal(state, [y, x, royal], direction, 2),
+          endPointXYR(state, [y, x, royal], direction, 2),
           direction2,
           [...prev, [y, x, royal]]
         )
@@ -61,7 +61,7 @@ export const jump = (state, [y, x, royal], direction, prev = []) =>
     ]
     : []
 
-export const endPoint = (state, [y, x, royal], [forward, sideward], steps = 1) => [
+export const endPointXY = (state, [y, x, royal], [forward, sideward], steps = 1) => [
   y + forward * playerDirection(state) * steps,
   x + sideward * steps
 ]
@@ -72,8 +72,8 @@ export const crowned = (state, [y, x, royal], [forward, sideward], steps = 1) =>
   (steps === 2 && state[state.opponent].find(([y2, x2]) =>
     y2 === y + forward * playerDirection(state) && x2 === x + sideward)[2])
 
-export const endPointRoyal = (state, [y, x, royal], [forward, sideward], steps = 1) => [
-  ...endPoint(state, [y, x, royal], [forward, sideward], steps),
+export const endPointXYR = (state, [y, x, royal], [forward, sideward], steps = 1) => [
+  ...endPointXY(state, [y, x, royal], [forward, sideward], steps),
   crowned(state, [y, x, royal], [forward, sideward], steps)
 ]
 
