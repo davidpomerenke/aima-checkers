@@ -16,7 +16,7 @@ export const checkers = new Game({
     opponent: 'q'
   },
   player: state => state.player,
-  actions: state => forceJump(state[state.player].flatMap(pos => [
+  actions: state => enforceJumping(state[state.player].flatMap(pos => [
     ...movePaths(state, pos),
     ...jumpPaths(state, pos)
   ])),
@@ -29,92 +29,81 @@ export const checkers = new Game({
   heuristic: state => state.p.length - state.q.length
 })
 
-export const forceJump = actions => actions.filter((action, _, actions) =>
-  !actions.some(action => dist(action[0], action[1]) / 2 === 2) ||
-  dist(action[0], action[1]) / 2 === 2
-)
-
 export const movePaths = (state, [y, x, royal]) =>
   directions(royal)
-    .map(direction => [[y, x, royal], endPointYXR(state, [y, x, royal], direction)])
+    .map(direction => [[y, x, royal], end(state, [y, x, royal], direction)])
     .filter(([start, end]) => onBoard(end) && !occupied(state, end))
 
+export const directions = royal => [[+1, -1], [+1, +1], ...royal ? [[-1, -1], [-1, +1]] : []]
+
+export const end = (state, [y, x, royal], [forward, sideward], steps = 1) => [
+  y + forward * direction(state.player) * steps,
+  x + sideward * steps,
+  ...typeof royal === 'undefined'
+    ? []
+    : [crowned(state, [y, x, royal], end(state, [y, x], [forward, sideward], steps))]
+]
+
+export const crowned = (state, [y1, x1, royal], [y2, x2]) =>
+  royal ||
+  y2 === 3.5 + 3.5 * direction(state.player) ||
+  (dist([y1, x1], [y2, x2]) / 2 === 2 &&
+    state[state.opponent].find(pos => eq(pos, intermediate([y1, x1], [y2, x2])))[2])
+
+export const eq = ([y1, x1], [y2, x2]) => y1 === y2 && x1 === x2
+
+export const direction = player => player === 'p' ? +1 : -1
+
+export const dist = ([y1, x1], [y2, x2]) => Math.abs(y2 - y1) + Math.abs(x2 - x1)
+
+export const intermediate = ([y1, x1], [y2, x2]) => [(y1 + y2) / 2, (x1 + x2) / 2]
+
+export const onBoard = ([y, x]) => y >= 0 && y <= 7 && x >= 0 && x <= 7
+
+export const occupied = (state, pos) => ['p', 'q'].some(p => occupiedBy(state, pos, p))
+
+export const occupiedBy = (state, posA, player) => state[player].some(posB => eq(posA, posB))
+
 export const jumpPaths = (state, start) =>
-  jump(state, start)
+  jumps(state, start)
     .flatMap(([start, end]) => [
       [start, end],
-      ...jumpPaths(/* state = */ stepResult(state, start, end, false), /* start = */ end)
+      ...jumpPaths(/* state = */ stepResult(state, [start, end], false), /* start = */ end)
         .map(jumpPath => [start, ...jumpPath])
-    ]
-    )
+    ])
 
-export const jump = (state, [y, x, royal]) =>
+export const jumps = (state, [y, x, royal]) =>
   directions(royal)
-    .map(direction => [[y, x, royal], endPointYX(state, [y, x, royal], direction, 2)])
+    .map(direction => [[y, x, royal], end(state, [y, x], direction, 2)])
     .filter(([start, end]) =>
       onBoard(end) &&
       !occupied(state, end) &&
       occupiedBy(state, intermediate(start, end), state.opponent))
     .map(([start, end]) => [start, [...end, crowned(state, start, end)]])
 
-export const endPointYX = (state, [y, x, royal], [forward, sideward], steps = 1) => [
-  y + forward * playerDirection(state) * steps,
-  x + sideward * steps
-]
+export const stepResult = (state, [start, end], nextPlayer) => ({
+  [state.player]: [...state[state.player].filter(pos => !eq(pos, start)), end],
+  [state.opponent]: state[state.opponent].filter(pos => !casualty(pos, [start, end])),
+  player: nextPlayer ? state.opponent : state.player,
+  opponent: nextPlayer ? state.player : state.opponent
+})
 
-export const crowned = (state, [y1, x1, royal], [y2, x2]) =>
-  royal ||
-  y2 === 3.5 + 3.5 * playerDirection(state) ||
-  (dist([y1, x1], [y2, x2]) / 2 === 2 &&
-    state[state.opponent].find(pos => eq(pos, intermediate([y1, x1], [y2, x2])))[2])
+export const casualty = (pos, action) =>
+  dist(...action) / 2 === 2 && eq(pos, intermediate(...action))
 
-export const endPointYXR = (state, start, direction, steps = 1) => [
-  ...endPointYX(state, start, direction, steps),
-  crowned(state, start, endPointYX(state, start, direction, steps))
-]
-
-export const onBoard = ([y, x]) => y >= 0 && y <= 7 && x >= 0 && x <= 7
-
-export const occupied = (state, pos) =>
-  ['p', 'q'].some(p => occupiedBy(state, pos, p))
-
-export const occupiedBy = (state, posA, player) =>
-  state[player].some(posB => eq(posA, posB))
-
-export const playerDirection = state => state.player === 'p' ? +1 : -1
-
-export const eq = ([y1, x1], [y2, x2]) => y1 === y2 && x1 === x2
-
-export const directions = royal => [[+1, -1], [+1, +1], ...royal ? [[-1, -1], [-1, +1]] : []]
+export const enforceJumping = actions => actions.filter(([start, end]) =>
+  !actions.some(([start, end]) => dist(start, end) / 2 === 2) ||
+  dist(start, end) / 2 === 2
+)
 
 export const recursiveResult = (state, action, nextPlayer = false) =>
   action.length >= 2
     ? stepResult(
       recursiveResult(state, action.slice(0, action.length - 1)),
-      action[action.length - 2],
-      action[action.length - 1],
+      [action[action.length - 2], action[action.length - 1]],
       nextPlayer
     )
     : state
-
-export const stepResult = (state, startPoint, endPoint, nextPlayer) => ({
-  [state.player]: [
-    ...state[state.player].filter(pos => !eq(pos, startPoint)),
-    endPoint
-  ],
-  [state.opponent]: state[state.opponent].filter(pos =>
-    !casualty(pos, [startPoint, endPoint])),
-  player: nextPlayer ? state.opponent : state.player,
-  opponent: nextPlayer ? state.player : state.opponent
-})
-
-export const casualty = (pos, [startPoint, endPoint]) =>
-  dist(startPoint, endPoint) / 2 === 2 &&
-  eq(pos, intermediate(startPoint, endPoint))
-
-export const dist = ([y1, x1], [y2, x2]) => Math.abs(y2 - y1) + Math.abs(x2 - x1)
-
-export const intermediate = ([y1, x1], [y2, x2]) => [(y1 + y2) / 2, (x1 + x2) / 2]
 
 export const boardString = state => board(state).map(row => row.join('')).reverse().join('\n')
 
