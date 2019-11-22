@@ -19,6 +19,7 @@ assert.deepEqual(board(state), [
   [' ', 'x', ' ', 'x', ' ', 'x', ' ', 'x'],
   ['x', ' ', 'x', ' ', 'x', ' ', 'x', ' ']
 ].reverse())
+assert.equal(checkers.player(state), 'q')
 
 state = checkers.result(state, [[5, 3, false], [4, 2, false]])
 assert.deepEqual(board(state), [
@@ -31,6 +32,7 @@ assert.deepEqual(board(state), [
   [' ', 'x', ' ', 'x', ' ', 'x', ' ', 'x'],
   ['x', ' ', 'x', ' ', 'x', ' ', 'x', ' ']
 ].reverse())
+assert.equal(checkers.player(state), 'p')
 
 state = checkers.result(state, [[3, 1, false], [5, 3, false]])
 assert.deepEqual(board(state), [
@@ -43,7 +45,9 @@ assert.deepEqual(board(state), [
   [' ', 'x', ' ', 'x', ' ', 'x', ' ', 'x'],
   ['x', ' ', 'x', ' ', 'x', ' ', 'x', ' ']
 ].reverse())
+assert.equal(checkers.heuristic(state), 1)
 assert(!checkers.terminalTest(state))
+assert.equal(checkers.utility(state), undefined)
 
 // testing
 

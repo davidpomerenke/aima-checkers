@@ -49,9 +49,9 @@ export const crowned = (state, [y1, x1, royal], end) =>
   crownRow(state, end) ||
   regicide(state, [y1, x1, royal], end)
 
-const crownRow = (state, [y, x]) => y === 3.5 + 3.5 * direction(state.player)
+export const crownRow = (state, [y, x]) => y === 3.5 + 3.5 * direction(state.player)
 
-const regicide = (state, start, end) => (dist(start, end) / 2 === 2 &&
+export const regicide = (state, start, end) => (dist(start, end) / 2 === 2 &&
     state[state.opponent].find(pos => eq(pos, intermediate(start, end)))[2])
 
 export const eq = ([y1, x1], [y2, x2]) => y1 === y2 && x1 === x2
