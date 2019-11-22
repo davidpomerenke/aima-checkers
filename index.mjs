@@ -16,15 +16,10 @@ export const checkers = new Game({
     opponent: 'q'
   },
   player: state => state.player,
-  actions: state => state[state.player].flatMap(([y, x, royal]) =>
-    directions(royal).flatMap(direction => [
-      ...move(state, [y, x, royal], direction),
-      ...jump(state, [y, x, royal], direction)
-    ]))
-    .filter((action, _, actions) =>
-      !actions.some(action => dist(action[0], action[1]) / 2 === 2) ||
-      dist(action[0], action[1]) / 2 === 2
-    ),
+  actions: state => forceJump(state[state.player].flatMap(pos => [
+    ...movePaths(state, pos),
+    ...jumpPaths(state, pos)
+  ])),
   result: (state, action) => recursiveResult(state, action, true),
   terminalTest: state =>
     state.p.length === 0 ||
@@ -34,47 +29,48 @@ export const checkers = new Game({
   heuristic: state => state.p.length - state.q.length
 })
 
-export const move = (state, startPoint, direction) =>
-  onBoard(endPointXY(state, startPoint, direction)) &&
-    !occupied(state, endPointXY(state, startPoint, direction))
-    ? [[startPoint, endPointXYR(state, startPoint, direction)]]
-    : []
+export const forceJump = actions => actions.filter((action, _, actions) =>
+  !actions.some(action => dist(action[0], action[1]) / 2 === 2) ||
+  dist(action[0], action[1]) / 2 === 2
+)
 
-export const jump = (state, [y, x, royal], direction, prev = []) =>
-  onBoard(endPointXY(state, [y, x], direction, 2)) &&
-    !occupied(state, endPointXY(state, [y, x], direction, 2)) &&
-    occupiedBy(state, endPointXY(state, [y, x], direction), state.opponent)
-    ? [
-      [
-        ...prev,
-        [y, x, royal],
-        endPointXYR(state, [y, x, royal], direction, 2)
-      ],
-      ...directions(crowned(state, [y, x, royal], direction, 2))
-        .flatMap(direction2 => jump(
-          prev.length === 1 ? state : recursiveResult(state, prev),
-          endPointXYR(state, [y, x, royal], direction, 2),
-          direction2,
-          [...prev, [y, x, royal]]
-        )
-        )
+export const movePaths = (state, [y, x, royal]) =>
+  directions(royal)
+    .map(direction => [[y, x, royal], endPointYXR(state, [y, x, royal], direction)])
+    .filter(([start, end]) => onBoard(end) && !occupied(state, end))
+
+export const jumpPaths = (state, start) =>
+  jump(state, start)
+    .flatMap(([start, end]) => [
+      [start, end],
+      ...jumpPaths(/* state = */ stepResult(state, start, end, false), /* start = */ end)
+        .map(jumpPath => [start, ...jumpPath])
     ]
-    : []
+    )
 
-export const endPointXY = (state, [y, x, royal], [forward, sideward], steps = 1) => [
+export const jump = (state, [y, x, royal]) =>
+  directions(royal)
+    .map(direction => [[y, x, royal], endPointYX(state, [y, x, royal], direction, 2)])
+    .filter(([start, end]) =>
+      onBoard(end) &&
+      !occupied(state, end) &&
+      occupiedBy(state, intermediate(start, end), state.opponent))
+    .map(([start, end]) => [start, [...end, crowned(state, start, end)]])
+
+export const endPointYX = (state, [y, x, royal], [forward, sideward], steps = 1) => [
   y + forward * playerDirection(state) * steps,
   x + sideward * steps
 ]
 
-export const crowned = (state, [y, x, royal], [forward, sideward], steps = 1) =>
+export const crowned = (state, [y1, x1, royal], [y2, x2]) =>
   royal ||
-  y + forward * playerDirection(state) * steps === 3.5 + 3.5 * playerDirection(state) ||
-  (steps === 2 && state[state.opponent].find(([y2, x2]) =>
-    y2 === y + forward * playerDirection(state) && x2 === x + sideward)[2])
+  y2 === 3.5 + 3.5 * playerDirection(state) ||
+  (dist([y1, x1], [y2, x2]) / 2 === 2 &&
+    state[state.opponent].find(pos => eq(pos, intermediate([y1, x1], [y2, x2])))[2])
 
-export const endPointXYR = (state, [y, x, royal], [forward, sideward], steps = 1) => [
-  ...endPointXY(state, [y, x, royal], [forward, sideward], steps),
-  crowned(state, [y, x, royal], [forward, sideward], steps)
+export const endPointYXR = (state, start, direction, steps = 1) => [
+  ...endPointYX(state, start, direction, steps),
+  crowned(state, start, endPointYX(state, start, direction, steps))
 ]
 
 export const onBoard = ([y, x]) => y >= 0 && y <= 7 && x >= 0 && x <= 7

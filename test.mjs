@@ -210,9 +210,15 @@ state = {
   player: 'p',
   opponent: 'q'
 }
-/* assert.deepEqual(checkers.actions(state), [
+assert.deepEqual(checkers.actions(state), [
   [[0, 0, false], [2, 2, false]],
   [[0, 0, false], [2, 2, false], [4, 4, true]],
   [[0, 0, false], [2, 2, false], [4, 4, true], [6, 6, true]],
   [[0, 0, false], [2, 2, false], [4, 4, true], [2, 6, true]]
-]) */
+])
+assert.deepEqual(checkers.result(state, [[0, 0, false], [2, 2, false], [4, 4, true], [2, 6, true]]), {
+  p: [[2, 6, true]],
+  q: [[5, 5, false]],
+  player: 'q',
+  opponent: 'p'
+})
