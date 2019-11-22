@@ -72,7 +72,7 @@ export const jumpPaths = (state, start) =>
   jumps(state, start)
     .flatMap(([start, end]) => [
       [start, end],
-      ...!crownRow(state, end) || start[2] || regicide(state, start, end)
+      ...!crownRow(state, end) || start[2] /* royal */ || regicide(state, start, end)
         ? [...jumpPaths(/* state = */ stepResult(state, [start, end], false), /* start = */ end)
           .map(jumpPath => [start, ...jumpPath])]
         : []
