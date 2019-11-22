@@ -44,11 +44,15 @@ export const end = (state, [y, x, royal], [forward, sideward], steps = 1) => [
     : [crowned(state, [y, x, royal], end(state, [y, x], [forward, sideward], steps))]
 ]
 
-export const crowned = (state, [y1, x1, royal], [y2, x2]) =>
+export const crowned = (state, [y1, x1, royal], end) =>
   royal ||
-  y2 === 3.5 + 3.5 * direction(state.player) ||
-  (dist([y1, x1], [y2, x2]) / 2 === 2 &&
-    state[state.opponent].find(pos => eq(pos, intermediate([y1, x1], [y2, x2])))[2])
+  crownRow(state, end) ||
+  regicide(state, [y1, x1, royal], end)
+
+const crownRow = (state, [y, x]) => y === 3.5 + 3.5 * direction(state.player)
+
+const regicide = (state, start, end) => (dist(start, end) / 2 === 2 &&
+    state[state.opponent].find(pos => eq(pos, intermediate(start, end)))[2])
 
 export const eq = ([y1, x1], [y2, x2]) => y1 === y2 && x1 === x2
 
@@ -68,8 +72,10 @@ export const jumpPaths = (state, start) =>
   jumps(state, start)
     .flatMap(([start, end]) => [
       [start, end],
-      ...jumpPaths(/* state = */ stepResult(state, [start, end], false), /* start = */ end)
-        .map(jumpPath => [start, ...jumpPath])
+      ...!crownRow(state, end) || start[2] || regicide(state, start, end)
+        ? [...jumpPaths(/* state = */ stepResult(state, [start, end], false), /* start = */ end)
+          .map(jumpPath => [start, ...jumpPath])]
+        : []
     ])
 
 export const jumps = (state, [y, x, royal]) =>

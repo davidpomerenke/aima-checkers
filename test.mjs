@@ -222,3 +222,17 @@ assert.deepEqual(checkers.result(state, [[0, 0, false], [2, 2, false], [4, 4, tr
   player: 'q',
   opponent: 'p'
 })
+
+// multiple jumping: stop for crowning
+state = {
+  p: [[5, 1, false]],
+  q: [
+    [6, 2, false],
+    [6, 4, false]
+  ],
+  player: 'p',
+  opponent: 'q'
+}
+assert.deepEqual(checkers.actions(state), [
+  [[5, 1, false], [7, 3, true]]
+])
