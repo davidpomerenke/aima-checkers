@@ -19,8 +19,5 @@
   },
   "scripts": {
     "test": "node --experimental-modules test.mjs"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
   }
 }
