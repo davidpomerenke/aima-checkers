@@ -3,7 +3,7 @@
 [![NPM version](https://img.shields.io/npm/v/aima-checkers.svg)](https://www.npmjs.com/package/aima-checkers)
 ![GitHub Actions status](https://github.com/davidpomerenke/aima-checkers/workflows/Node%20CI/badge.svg)
 
-This is a formulation of the checkers game in the formal paradigm presented in [*Artificial Intelligence - A Modern Approach*](http://aima.cs.berkeley.edu/) (*AIMA*) by Stuart Russell and Peter Norvig. This module can be used in combination with the search algorithms from [aima.js](https://github.com/davidpomerenke/aima.js), specifically the `minimaxDecision` and the `alphaBetaSearch` algorithms. 
+This is a formulation of the checkers game in the formal paradigm presented in [*Artificial Intelligence - A Modern Approach*](http://aima.cs.berkeley.edu/) (*AIMA*) by Stuart Russell and Peter Norvig. This module can be used in combination with the search algorithms from [aima-coffee](https://github.com/davidpomerenke/aima-coffee), specifically the `minimaxDecision` and the `alphaBetaSearch` algorithms. 
 
 ## Rules
 

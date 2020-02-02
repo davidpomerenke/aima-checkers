@@ -1,5 +1,4 @@
 import { checkers, board, boardString } from './index.mjs'
-// import * as i from './index.mjs'
 import { strict as assert } from 'assert'
 
 let state
