@@ -15,7 +15,7 @@
     "Artificial Intelligence"
   ],
   "dependencies": {
-    "aima": "^0.6.2"
+    "aima": "^0.6.6"
   },
   "scripts": {
     "test": "node --experimental-modules test.mjs"
